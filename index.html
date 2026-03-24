@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>حساب البرج</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="icon" href="favicon.png" type="image/png" />
+  <style>
+    :root {
+      --bg-deep:    #0d0d1a;
+      --bg-card:    #13132a;
+      --accent:     #c89b3c;
+      --accent-glow:#c89b3c55;
+      --text-main:  #f0e8d5;
+      --text-muted: #8a849e;
+      --border:     #2a2a4a;
+      --radius:     16px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+      background-image:
+        radial-gradient(ellipse at 20% 10%, #1a1040 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 90%, #0a1a3a 0%, transparent 50%);
+    }
+
+    /* ─── Header ─── */
+    .app-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .app-header .stars {
+      font-size: 1.6rem;
+      letter-spacing: 6px;
+      color: var(--accent);
+      opacity: .7;
+    }
+    .app-header h1 {
+      font-size: clamp(2rem, 6vw, 3rem);
+      font-weight: 900;
+      color: var(--accent);
+      text-shadow: 0 0 30px var(--accent-glow);
+      margin: .25rem 0 .5rem;
+    }
+    .app-header p {
+      color: var(--text-muted);
+      font-size: .95rem;
+    }
+
+    /* ─── Card ─── */
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: 0 8px 40px #00000060;
+    }
+
+    /* ─── Form ─── */
+    .form-label {
+      color: var(--text-muted);
+      font-size: .9rem;
+      margin-bottom: .4rem;
+    }
+    .form-control {
+      background: #0d0d1a;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1.05rem;
+      padding: .75rem 1rem;
+      transition: border-color .25s, box-shadow .25s;
+    }
+    .form-control:focus {
+      background: #0d0d1a;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      color: var(--text-main);
+      outline: none;
+    }
+    .form-control::placeholder { color: #44405a; }
+
+    /* ─── Button ─── */
+    .btn-calculate {
+      width: 100%;
+      padding: .85rem;
+      background: linear-gradient(135deg, #b8852a, #e0b85a);
+      border: none;
+      border-radius: 12px;
+      color: #0d0d1a;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+      margin-top: .5rem;
+    }
+    .btn-calculate:hover  { opacity: .9; }
+    .btn-calculate:active { transform: scale(.98); }
+
+    /* ─── Error ─── */
+    .error-msg {
+      color: #e07070;
+      font-size: .88rem;
+      margin-top: .4rem;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+
+    /* ─── Result ─── */
+    #result-section { display: none; animation: fadeUp .5s ease both; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .zodiac-icon {
+      font-size: clamp(3.5rem, 12vw, 5rem);
+      line-height: 1;
+      margin-bottom: .5rem;
+      filter: drop-shadow(0 0 18px var(--accent-glow));
+    }
+    .zodiac-name {
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-weight: 900;
+      color: var(--accent);
+    }
+    .zodiac-subtitle { color: var(--text-muted); font-size: .9rem; margin-top: .25rem; }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .65rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .92rem;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--text-muted); }
+    .info-value { color: var(--text-main); font-weight: 600; }
+
+    .btn-reset {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-family: 'Tajawal', sans-serif;
+      font-size: .9rem;
+      padding: .6rem 1.5rem;
+      cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-reset:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ─── Divider ─── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" style="max-width:480px;">
+
+    <!-- Header -->
+    <div class="app-header">
+      <div class="stars">✦ ✦ ✦</div>
+      <h1>حساب البرج</h1>
+      <p>أدخل اسم الابن واسم أمه لمعرفة برجه</p>
+    </div>
+
+    <!-- Form card -->
+    <div class="glass-card mb-4">
+      <div class="mb-3">
+        <label class="form-label">اسم الابن (بالعربية)</label>
+        <input type="text" id="input-son" class="form-control" placeholder="مثال: علي" autocomplete="off" />
+        <div class="error-msg" id="err-son">يرجى إدخال اسم عربي صحيح</div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">اسم الأم (بالعربية)</label>
+        <input type="text" id="input-mother" class="form-control" placeholder="مثال: فاطمة" autocomplete="off" />
+        <div class="error-msg" id="err-mother">يرجى إدخال اسم عربي صحيح</div>
+      </div>
+
+      <button class="btn-calculate" onclick="handleCalculate()">✨ احسب البرج</button>
+    </div>
+
+    <!-- Result card -->
+    <div class="glass-card text-center" id="result-section">
+      <div class="zodiac-icon" id="result-icon"></div>
+      <div class="zodiac-name"  id="result-name"></div>
+      <div class="zodiac-subtitle" id="result-subtitle"></div>
+
+      <hr class="divider" />
+
+      <div class="mb-3">
+        <div class="info-row">
+          <span class="info-label">اسم الابن</span>
+          <span class="info-value" id="disp-son"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">قيمة اسم الابن</span>
+          <span class="info-value" id="disp-son-val"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">اسم الأم</span>
+          <span class="info-value" id="disp-mother"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">قيمة اسم الأم</span>
+          <span class="info-value" id="disp-mother-val"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">المجموع الكلي</span>
+          <span class="info-value" id="disp-total"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">رقم البرج</span>
+          <span class="info-value" id="disp-zodiac-num"></span>
+        </div>
+      </div>
+
+      <button class="btn-reset" onclick="handleReset()">↩ إعادة الحساب</button>
+    </div>
+
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    /* ─────────────────────────────────────────
+       CONSTANTS
+    ───────────────────────────────────────── */
+    const LETTER_VALUES = {
+      'أ':1,'ا':1,'إ':1,'آ':1,
+      'ب':2,
+      'ت':4,
+      'ث':8,
+      'ج':3,
+      'ح':8,
+      'خ':12,
+      'د':4,
+      'ذ':4,
+      'ر':8,
+      'ز':7,
+      'س':12,
+      'ش':12,
+      'ص':6,
+      'ض':8,
+      'ط':9,
+      'ظ':12,
+      'ع':10,
+      'غ':4,
+      'ف':8,
+      'ق':4,
+      'ك':8,
+      'ل':6,
+      'م':4,
+      'ن':2,
+      'ه':5,'ة':5,
+      'و':6,
+      'ي':10,'ى':10,
+      'ئ':10,'ؤ':6,'ء':1
+    };
+
+    const ZODIACS = [
+      null, // index 0 unused
+      { name: 'الحمل',   icon: '♈', element: 'نار' },
+      { name: 'الثور',   icon: '♉', element: 'أرض' },
+      { name: 'الجوزاء', icon: '♊', element: 'هواء' },
+      { name: 'السرطان', icon: '♋', element: 'ماء' },
+      { name: 'الأسد',   icon: '♌', element: 'نار' },
+      { name: 'العذراء', icon: '♍', element: 'أرض' },
+      { name: 'الميزان', icon: '♎', element: 'هواء' },
+      { name: 'العقرب',  icon: '♏', element: 'ماء' },
+      { name: 'القوس',   icon: '♐', element: 'نار' },
+      { name: 'الجدي',   icon: '♑', element: 'أرض' },
+      { name: 'الدلو',   icon: '♒', element: 'هواء' },
+      { name: 'الحوت',   icon: '♓', element: 'ماء' }
+    ];
+
+    const ARABIC_REGEX = /^[\u0600-\u06FF\s]+$/;
+
+    /* ─────────────────────────────────────────
+       PURE FUNCTIONS
+    ───────────────────────────────────────── */
+
+    /**
+     * Calculates the numeric value of an Arabic name.
+     * @param {string} name
+     * @returns {number}
+     */
+    function calcNameValue(name) {
+      return name.split('').reduce((sum, char) => {
+        return sum + (LETTER_VALUES[char] ?? 0);
+      }, 0);
+    }
+
+    /**
+     * Reduces a total to the smallest positive integer
+     * by repeatedly subtracting 12 (the zodiac cycle).
+     * @param {number} total
+     * @returns {number}
+     */
+    function reduceToZodiacNumber(total) {
+      let n = total;
+      while (n - 12 > 0) n -= 12;
+      return n;
+    }
+
+    /**
+     * Validates that a string contains only Arabic characters.
+     * @param {string} value
+     * @returns {boolean}
+     */
+    function isValidArabicName(value) {
+      return value.trim().length > 0 && ARABIC_REGEX.test(value.trim());
+    }
+
+    /**
+     * Returns the zodiac object for a given number (1–12).
+     * @param {number} num
+     * @returns {{ name: string, icon: string, element: string }}
+     */
+    function getZodiac(num) {
+      return ZODIACS[num] ?? null;
+    }
+
+    /* ─────────────────────────────────────────
+       DOM HELPERS
+    ───────────────────────────────────────── */
+    const el = (id) => document.getElementById(id);
+
+    function showError(fieldId, errorId, show) {
+      const field = el(fieldId);
+      const msg   = el(errorId);
+      if (show) {
+        field.style.borderColor = '#e07070';
+        msg.classList.add('show');
+      } else {
+        field.style.borderColor = '';
+        msg.classList.remove('show');
+      }
+    }
+
+    function setResultUI({ sonName, sonVal, motherName, motherVal, total, zodiacNum, zodiac }) {
+      el('result-icon').textContent    = zodiac.icon;
+      el('result-name').textContent    = zodiac.name;
+      el('result-subtitle').textContent = `عنصر: ${zodiac.element}`;
+      el('disp-son').textContent       = sonName;
+      el('disp-son-val').textContent   = sonVal;
+      el('disp-mother').textContent    = motherName;
+      el('disp-mother-val').textContent = motherVal;
+      el('disp-total').textContent     = total;
+      el('disp-zodiac-num').textContent = zodiacNum;
+    }
+
+    /* ─────────────────────────────────────────
+       EVENT HANDLERS
+    ───────────────────────────────────────── */
+    function handleCalculate() {
+      const sonRaw    = el('input-son').value;
+      const motherRaw = el('input-mother').value;
+
+      const sonValid    = isValidArabicName(sonRaw);
+      const motherValid = isValidArabicName(motherRaw);
+
+      showError('input-son',    'err-son',    !sonValid);
+      showError('input-mother', 'err-mother', !motherValid);
+
+      if (!sonValid || !motherValid) return;
+
+      const sonName    = sonRaw.trim();
+      const motherName = motherRaw.trim();
+      const sonVal     = calcNameValue(sonName);
+      const motherVal  = calcNameValue(motherName);
+      const total      = sonVal + motherVal;
+      const zodiacNum  = reduceToZodiacNumber(total);
+      const zodiac     = getZodiac(zodiacNum);
+
+      setResultUI({ sonName, sonVal, motherName, motherVal, total, zodiacNum, zodiac });
+
+      // Show result with animation restart
+      const section = el('result-section');
+      section.style.display = 'none';
+      requestAnimationFrame(() => {
+        section.style.display = 'block';
+        section.style.animation = 'none';
+        requestAnimationFrame(() => {
+          section.style.animation = '';
+        });
+      });
+
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function handleReset() {
+      el('input-son').value    = '';
+      el('input-mother').value = '';
+      showError('input-son',    'err-son',    false);
+      showError('input-mother', 'err-mother', false);
+      el('result-section').style.display = 'none';
+      el('input-son').focus();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Allow Enter key to trigger calculation
+    ['input-son', 'input-mother'].forEach(id => {
+      el(id).addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleCalculate();
+      });
+    });
+  </script>
+</body>
+</html>
