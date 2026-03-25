@@ -1,0 +1,12 @@
+# netlify.toml
+# إعدادات النشر على Netlify
+
+[build]
+  publish = "."        # المجلد الجذر هو الـ output
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
